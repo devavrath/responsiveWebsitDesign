@@ -1,0 +1,455 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv='Content-Type' content='text/html;charset=UTF-8' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- <script src="js/jquery.min.js"></script> -->
+<!-- <script src="js/bootstrap.min.js"></script> -->
+<!-- 		<script src="js/npm.js"></script>		 -->
+<!-- <script src="js/myJS.js"></script> -->
+<!-- <link href="css/myCSS.css" rel="stylesheet"> -->
+<!-- 	<link href="css/bootstrap.min.css" rel="stylesheet"> -->
+<!-- 	<link href="data:text/css;charset=utf-8," -->
+<!-- 	data-href="css/bootstrap-theme.min.css" rel="stylesheet" -->
+<!-- 	id="bs-theme-stylesheet"> -->
+<link href="http://getbootstrap.com/examples/grid/grid.css"
+	rel="stylesheet">
+<!-- Uncomment during final upload		 -->
+<!-- <script -->
+<!-- 	src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+<!-- <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script> -->
+<!-- <link href="http://getbootstrap.com/dist/css/bootstrap.min.css" -->
+<!-- 	rel="stylesheet"> -->
+<!-- <link href="data:text/css;charset=utf-8," -->
+<!-- 	data-href="http://getbootstrap.com/dist/css/bootstrap-theme.min.css" -->
+<!-- 	rel="stylesheet" id="bs-theme-stylesheet"> -->
+<!-- <script src="http://jqueryvalidation.org/files/dist/jquery.validate.js"></script> -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+<script src="http://jqueryvalidation.org/files/dist/jquery.validate.min.js"></script>
+<script src="http://jqueryvalidation.org/files/dist/additional-methods.min.js"></script>
+<link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+<script>
+			(function(d, s, id) {
+				  var js, fjs = d.getElementsByTagName(s)[0];
+				  if (d.getElementById(id)) return;
+				  js = d.createElement(s); js.id = id;
+				  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=747230538686952&version=v2.0";
+				  fjs.parentNode.insertBefore(js, fjs);
+				}(document, 'script', 'facebook-jssdk'));
+</script>
+
+<script>
+
+$(document).ready(function () {
+	$('#myForm').validate({ 
+		rules: {
+			Address: {
+				required: true,
+				minlength: 1,
+			},
+			City: {
+				required: true,
+				minlength: 1,
+			},
+			state: {
+				required: true,
+				minlength: 1,
+			}            
+		},
+
+		highlight: function(element) {
+			$(element).closest('.form-group').addClass('has-error');
+		},
+		unhighlight: function(element) {
+			$(element).closest('.form-group').removeClass('has-error');
+		},
+		errorElement: 'span',
+		errorClass: 'help-block',
+		errorPlacement: function(error, element) {
+			if(element.parent('.input-group').length) {
+				error.insertAfter(element);
+			} else {
+				error.insertAfter(element);
+			}},
+			submitHandler: function (form) { 
+				var streetAddress = $("#myForm").find("#streetAddress").val();
+				var city = $("#myForm").find("#city").val();
+				var state = $("#myForm").find("#state").val();
+
+				var data = {
+						"action": "test"
+				};
+				data = $("#myForm").serialize() + "&" + $.param(data);
+				$.ajax({
+					type: "POST",
+					dataType: "json",
+ 					url: "http://devavrath.elasticbeanstalk.com",
+// 					url: 'http://localhost:81/HW/HW8_Devavrath.php',
+					data: data,
+					success: function(data) {
+						showTableData(data);
+					},
+					error: function(e){
+						$("#errorMessage").toggleClass('row hidden row show help-block');
+						$("#errorMessage").append(e.responseText);
+					}
+				});
+				return false;
+			},
+	});
+});
+
+$('#basicInfo').click(function (e) {
+	e.preventDefault()
+	$(this).tab('show')
+});
+
+
+
+function showTableData(data){
+	data=JSON.parse(data);
+	data["result"]=JSON.parse(data["result"]);
+	data["chart"]=JSON.parse(data["chart"]);
+	result=data.result;
+	result.chart=data.chart["1year"];
+	$("#tableList").html("");
+	
+// 	$("#errorMessage").toggleClass('row show help-block row hidden');
+// 	$("#tableList").toggleClass('row hidden row show');
+	var img1;
+	var img2;
+	if(result.estimateValueChangeSign == "+"){
+		img1=result.imgp;
+	}
+	else {
+		img1=result.imgn;
+	}
+	if(result.restimateValueChangeSign == "+"){
+		img2=result.imgp;
+	}
+	else {
+		img2=result.imgn;
+	}
+	$("#tableActual").append("<tbody>" +
+			"<tr><td colspan=3>See more details for <a href = '"
+			+result.homedetails["0"]+ "'>" + result.street["0"] + ", " 
+			+ result.city + ", " 
+			+ result.state + "-" 
+			+result.zipcode["0"]+ "" + "</a>  on Zillow</td>"+"<td><button type=\"button\" class=\"btn btn-primary\" id=\"facebookButton\">Share on Facebook</button></td></tr>"+		
+			"<tr><td> Property type: </td><td> " + result.useCode["0"] + "</td><td> Last Sold Price: </td><td> " 
+			+result.lastSoldPrice+ "</td></tr>" + "<tr><td> Year Built: </td><td> " + result.yearBuilt["0"] + "</td>"+
+			"<td> Last Sold Date: </td><td> " + result.lastSoldDate + "</td></tr>"+
+			"<tr><td> Lot Size: </td><td> " + result.lotSizeSqFt["0"] + " sq.ft</td><td>"+
+			"Zestimate &reg Property Estimate as of " + result.estimateLastUpdate + "</td>"+
+			"<td> " + result.estimateAmount + "</td></tr>"+
+			"<tr><td> Finished Area: </td><td> " + result.finishedSqFt["0"] + " sq.ft</td><td>"+
+			"30 Days Overall Change: </td><td> <img src=\""+img1+"\"> " +result.estimateValueChange+"</td></tr>"+
+			"<tr><td>Bathrooms:</td><td>" +result.bathrooms["0"]+ "</td><td>All Time Property Range :</td>	<td>"
+			+result.estimateValuationRangeLow+" - "+result.estimateValuationRangeHigh+"</td></tr>"+
+			"<td>Bedrooms:</td><td>" +result.bedrooms["0"]+ "</td><td> Rent Zestimate &reg Property Estimate as of " +
+			result.restimateLastUpdate + "</td><td> " + result.restimateAmount + "</td></tr>"+
+			"<tr><td> Tax Assesment Year: </td><td> " + result.taxAssessmentYear["0"] + 
+			"</td><td> 30 Days Rent Change: </td><td> <img src=\""+img2+"\"> "+result.restimateValueChange+"</td></tr>"+
+			"<tr><td> Tax Assesment: </td><td> " + result.taxAssessment + "</td><td>All Time Rent Range :</td><td>"+
+			result.restimateValuationRangeLow+" - "+result.restimateValuationRangeHigh+"</td></tr></table>"
+	);
+	for(var i=0;i<Object.keys(data.chart).length;i++){
+		if(i==0){
+			$("#carouselActiveObject").append(
+					"<img style=\"margin-left: 25%;\" src=\""+data.chart["1year"]+"\">" +
+					"<div class=\"carousel-caption\" style=\"margin-left: 5%;width: 50%;color: #ffffff;background: rgba(0, 0, 0,0.4);\">Historical Zestimates for the past 1 year<br>" +
+					result.street["0"] + ", "+ result.city + ", "+ result.state + "-"+result.zipcode["0"]+
+			"</div>");
+		}
+		else if(i==1){
+			$("#carouselItem1").append(
+					"<div class=\"item\"><img style=\"margin-left: 25%;\" src=\""+data.chart[Object.keys(data.chart)[i]]+"\">" +
+					"<div class=\"carousel-caption\" style=\"margin-left: 5%;width: 50%;color: #ffffff;background: rgba(0, 0, 0,0.4);\">Historical Zestimates for the past "+Object.keys(data.chart)[i]+"<br>" +
+					result.street["0"] + ", "+ result.city + ", "+ result.state + "-"+result.zipcode["0"]+
+			"</div></div>");
+		}
+		else if(i==2){
+			$("#carouselItem2").append(
+					"<div class=\"item\"><img style=\"margin-left: 25%;\" src=\""+data.chart[Object.keys(data.chart)[i]]+"\">" +
+					"<div class=\"carousel-caption\" style=\"margin-left: 5%;width: 50%;color: #ffffff;background: rgba(0, 0, 0,0.4);\">Historical Zestimates for the past "+Object.keys(data.chart)[i]+"<br>" +
+					result.street["0"] + ", "+ result.city + ", "+ result.state + "-"+result.zipcode["0"]+
+			"</div></div>");
+		}
+	}
+	//$('.carousel').carousel()
+// 	$('a[data-slide="prev"]').click(function() {
+// 			$('#myCarousel').carousel('prev');
+// 	});
+	
+// 	$('a[data-slide="next"]').click(function() {
+// 		$('#myCarousel').carousel('next');
+// 	});
+	$('#facebookButton').click(function (e) {
+
+		FB.ui(
+				{
+					method: 'feed',
+					name: result.street["0"]+","+result.city+","+result.state,
+					link: result.homedetails["0"],
+					picture: result.chart,
+					caption: 'Property Information from Zillow.com: ',
+					description: 
+						('Last Sold Price:'+result.lastSoldPrice+',30 Days Overall Change:'+result.restimateValueChangeSign+result.restimateValueChange)
+				},
+
+
+
+				function(response) {
+					if (response && response.post_id) {
+						alert('Post was published.');
+					} else {
+						alert('Post was not published.');
+					}
+				}
+		);
+
+	});
+}
+</script>
+<style>
+.sapUiBody {
+	background: url('http://www.neovisual.cz/files/V0862-d9.jpg') no-repeat
+		center center fixed !important;
+	-moz-background-size: cover;
+	-webkit-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover !important;
+}
+
+#tableList {
+	background-color: honeydew;
+	width: 90%;
+	margin-left: 5%;
+}
+
+#myForm {
+	width: 90%;
+	margin-left: 5%;
+}
+
+#tableId {
+	width: 96%;
+	margin-left: 2%;
+}
+
+#facebookButton {
+	margin-left: 43%;
+}
+
+@
+-moz-document url-prefix () {fieldset { display:table-cell;
+	
+}
+}
+</style>
+</head>
+<body class="sapUiBody" role="application">
+	<div class="container-fluid">
+		<div style="margin-right: auto; width: 90%; margin-left: 5%;">
+			<h3 style="color: #ff9912">Search Your Property here</h3>
+		</div>
+		<form role="form" class="form-inline" id="myForm">
+			<div class="form-group" style="color: #ff9912">
+				<label for="Street Address">Street Address*:</label>
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<input type="text" class="form-control input-sm" id="streetAddress"
+					placeholder="Address" name="Address">
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<label for="City">City:</label>
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<input type="text" class="form-control input-sm" id="city"
+					placeholder="City" name="City">
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<label for="State">State*:</label>
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<select name="state" size="1" class="form-control input-sm"
+					id="state">
+					<option value=""></option>
+					<option value="AK">AK</option>
+					<option value="AL">AL</option>
+					<option value="AR">AR</option>
+					<option value="AZ">AZ</option>
+					<option value="CA">CA</option>
+
+					<option value="CO">CO</option>
+					<option value="CT">CT</option>
+					<option value="DC">DC</option>
+					<option value="DE">DE</option>
+
+					<option value="FL">FL</option>
+					<option value="GA">GA</option>
+					<option value="HI">HI</option>
+					<option value="IA">IA</option>
+
+					<option value="ID">ID</option>
+					<option value="IL">IL</option>
+					<option value="IN">IN</option>
+					<option value="KS">KS</option>
+
+					<option value="KY">KY</option>
+					<option value="LA">LA</option>
+					<option value="MA">MA</option>
+					<option value="MD">MD</option>
+
+					<option value="ME">ME</option>
+					<option value="MI">MI</option>
+					<option value="MN">MN</option>
+					<option value="MO">MO</option>
+
+					<option value="MS">MS</option>
+					<option value="MT">MT</option>
+					<option value="NC">NC</option>
+					<option value="ND">ND</option>
+
+					<option value="NE">NE</option>
+					<option value="NH">NH</option>
+					<option value="NJ">NJ</option>
+					<option value="NM">NM</option>
+
+					<option value="NV">NV</option>
+					<option value="NY">NY</option>
+					<option value="OH">OH</option>
+					<option value="OK">OK</option>
+
+					<option value="OR">OR</option>
+					<option value="PA">PA</option>
+					<option value="RI">RI</option>
+					<option value="SC">SC</option>
+
+					<option value="SD">SD</option>
+					<option value="TN">TN</option>
+					<option value="TX">TX</option>
+					<option value="UT">UT</option>
+
+					<option value="VA">VA</option>
+					<option value="VT">VT</option>
+					<option value="WA">WA</option>
+					<option value="WI">WI</option>
+
+					<option value="WV">WV</option>
+					<option value="WY">WY</option>
+				</select>
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<input type="submit" name="SubmitButton"
+					class="btn btn-warning submitButton btn-sm" value="Submit">
+			</div>
+			<div class="form-group" style="color: #ff9912">
+				<img
+					src="http://www.zillow.com/widgets/GetVersionedResource.htm?path=/static/logos/Zillowlogo_150x40_rounded.gif"
+					class="img-thumbnail" width="100" height="40"
+					alt="Zillow Real Estate Search">
+			</div>
+		<hr>
+		<div class="row hidden" id="errorMessage" style="color: red;"></div>
+		<div class="row hidden" id="tableList">
+			<ul class="nav nav-tabs" role="tablist">
+				<li role="presentation" class="active"><a href="#basicInfo"
+					role="tab" data-toggle="tab">Basic Info</a></li>
+				<li role="presentation"><a href="#historicalZestimates"
+					role="tab" data-toggle="tab">Historical Zestimates</a></li>
+			</ul>
+			<div class="tab-content">
+				<div role="tabpanel" class="tab-pane fade in active" id="basicInfo">
+					<div id="tableId">
+						<div id="tableHeader"></div>
+						<div class="table-responsive">
+							<table class="table table-striped" id="tableActual">
+							</table>
+						</div>
+					</div>
+				</div>
+				<div role="tabpanel" class="tab-pane fade" id="historicalZestimates">
+<!-- 					<div id="carouselMine" class="carousel slide" -->
+<!-- 						data-ride="carousel"> -->
+<!-- 						Indicators -->
+<!-- 						<ol class="carousel-indicators"> -->
+<!-- 							<li data-target="#carouselMine" data-slide-to="0" -->
+<!-- 								class="active"></li> -->
+<!-- 							<li data-target="#carouselMine" data-slide-to="1"></li> -->
+<!-- 							<li data-target="#carouselMine" data-slide-to="2"></li> -->
+<!-- 						</ol> -->
+
+<!-- 						Wrapper for slides -->
+<!-- 						<div class="carousel-inner" role="listbox" id="CarouselMain"> -->
+<!-- 							<div class="item active" id="carouselActiveObject"></div> -->
+
+<!-- 							Controls -->
+<!-- 							<a class="left carousel-control" href="#carouselMine" -->
+<!-- 								role="button" data-slide="prev"> <span -->
+<!-- 								class="glyphicon glyphicon-chevron-left"></span> <span -->
+<!-- 								class="sr-only">Previous</span> -->
+<!-- 							</a> <a class="right carousel-control" -->
+<!-- 								href="#carouselMine" role="button" data-slide="next"> -->
+<!-- 								<span class="glyphicon glyphicon-chevron-right"></span> <span -->
+<!-- 								class="sr-only">Next</span> -->
+<!-- 							</a> -->
+<!-- 						</div> -->
+<!-- 					</div> -->
+	<div id="carousel" class="carousel slide" data-ride="carousel">
+    Menu
+    <ol class="carousel-indicators">
+        <li data-target="#carousel" data-slide-to="0" class="active"></li>
+        <li data-target="#carousel" data-slide-to="1"></li>
+        <li data-target="#carousel" data-slide-to="2"></li>
+    </ol>
+    
+    Items
+    <div class="carousel-inner" id="CarouselMain">
+        
+        <div class="item active" id="carouselActiveObject">
+<!--             <img src="http://lorempixel.com/1500/600/abstract/1" alt="Slide 1" /> -->
+        </div>
+        <div class="item" id="carouselItem1">
+<!--             <img src="http://lorempixel.com/1500/600/abstract/2" alt="Slide 2" /> -->
+        </div>
+        <div class="item" id="carouselItem2">
+<!--             <img src="http://lorempixel.com/1500/600/abstract/3" alt="Slide 3" /> -->
+        </div>
+    </div> 
+    <a href="#carousel" class="left carousel-control" data-slide="prev">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a href="#carousel" class="right carousel-control" data-slide="next">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
+</div>
+				</div>
+			</div>
+		</div>
+		<div style="width: 60%; margin-left: 20%; height: 50px; color: white">
+			<samp>
+				<div style="width: 60%; margin-left: 26%; color: white">
+					&copy Zillow, Inc., 2006-2014. Use is subject to <a
+						href="http://www.zillow.com/corp/Terms.htm"
+						style="color: #01070D;">Terms of Use</a>
+				</div>
+				<div style="width: 40%; margin-left: 40%; color: white">
+					<a href="http://www.zillow.com/wikipages/What-is-a-Zestimate/"
+						style="color: #01070D;">What's a Zestimate?</a>
+				</div>
+			</samp>
+		</div>
+	</div>
+	<noscript>
+	</form>
+</body>
+</html>

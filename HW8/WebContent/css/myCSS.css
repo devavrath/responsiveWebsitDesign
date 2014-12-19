@@ -1,0 +1,32 @@
+.sapUiBody {
+	background: url('http://www.neovisual.cz/files/V0862-d9.jpg') no-repeat
+		center center fixed !important;
+	-moz-background-size: cover;
+	-webkit-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover !important;
+}
+
+#tableList {
+	background-color: honeydew;
+	width: 90%;
+	margin-left: 5%;
+}
+
+#myForm {
+	width: 90%;
+	margin-left: 5%;
+}
+
+#tableId {
+	width: 96%;
+	margin-left: 2%;
+}
+
+#facebookButton {
+	margin-left: 43%;
+}
+
+@-moz-document url-prefix() {
+  fieldset { display: table-cell; }
+}
